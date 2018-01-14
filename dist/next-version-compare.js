@@ -15,9 +15,7 @@
       var toInt = function (inStr) {
         return +(inStr.slice(0, min).replace(DOT, BLANK))
       };
-      var ver1 = toInt(inVer1);
-      var ver2 = toInt(inVer2);
-      var diff = ver1 - ver2;
+      var diff = toInt(inVer1) - toInt(inVer2);
       return diff / Math.abs(diff);
     }
   };
