@@ -9,9 +9,9 @@
     var nRes = 0
       , parts1 = inVer1.split('.')
       , parts2 = inVer2.split('.')
-      , nLen = Math.max(parts1.length, parts2.length);
+      , max = Math.max(parts1.length, parts2.length);
 
-    for (var i = 0; i < nLen; i++) {
+    for (var i = 0; i < max; i++) {
       var nP1 = (i < parts1.length) ? parseInt(parts1[i], 10) : 0
         , nP2 = (i < parts2.length) ? parseInt(parts2[i], 10) : 0;
 
