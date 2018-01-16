@@ -4,9 +4,9 @@ require('../src/next-version-compare');
 
 describe('next/versionCompare', function () {
 
-  it('nx.versionCompare 1.0 & 1.0 should be 0', function () {
-    var ver1 = '1.0';
-    var ver2 = '1.0';
+  it('nx.versionCompare 1.0 & 1.0.0 should be 0', function () {
+    var ver1 = '1';
+    var ver2 = '1.0.0';
 
     assert.equal(nx.versionCompare(ver1,ver2), 0);
   });
