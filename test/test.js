@@ -42,4 +42,11 @@ describe('next/versionCompare', function () {
 
   //todo: sort by
 
+  it('nx.versionCompare "10.3.3" & "10" should be 1', function () {
+    var ver1 = '10.3.3';
+    var ver2 = '10';
+
+    assert.equal(nx.versionCompare(ver1,ver2), 1);
+  });
+
 });

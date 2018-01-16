@@ -6,17 +6,15 @@
   var BLANK = '';
 
   nx.versionCompare = function (inVer1,inVer2) {
-    if (inVer1 === inVer2) {
-      return 0;
-    } else {
-      var len1 = inVer1.length;
-      var len2 = inVer2.length;
-      var min = Math.min(len1, len2);
-      var toInt = function (inStr) {
-        return +(inStr.slice(0, min).replace(DOT, BLANK))
-      };
-      var diff = toInt(inVer1) - toInt(inVer2);
-      return diff / Math.abs(diff);
+    var ver1 = String( inVer1 );
+    var ver2 = String( inVer2 );
+    switch(true){
+      case ver1 === ver2:
+        return 0;
+      case ver1 > ver2:
+        return 1;
+      case ver1 < ver2:
+        return -1;
     }
   };
 
