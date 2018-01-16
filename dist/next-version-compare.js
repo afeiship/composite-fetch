@@ -6,7 +6,7 @@
   var BLANK = '';
 
   nx.versionCompare = function (inVer1,inVer2) {
-    var nRes = 0
+    var result = 0
       , parts1 = String(inVer1).split('.')
       , parts2 = String(inVer2).split('.')
       , max = Math.max(parts1.length, parts2.length);
@@ -19,12 +19,12 @@
       if (isNaN(nP2)) { nP2 = 0; }
 
       if (nP1 != nP2) {
-        nRes = (nP1 > nP2) ? 1 : -1;
+        result = (nP1 > nP2) ? 1 : -1;
         break;
       }
     }
 
-    return nRes;
+    return result;
   };
 
 
