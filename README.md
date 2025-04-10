@@ -16,6 +16,10 @@ yarn add @jswork/composite-fetch
 import compositeFetch from '@jswork/composite-fetch';
 
 const jsonMiddleware = async (ctx, next) => {
+
+  // add coustom header
+  ctx.request.headers.set('X-Custom-Header', 'test-value');
+
   await next();
   const response = ctx.response;
   const contentType = response.headers.get('Content-Type');
@@ -23,7 +27,7 @@ const jsonMiddleware = async (ctx, next) => {
     contentType &&
     contentType.indexOf('application/json') !== -1
   ) {
-    ctx.response = await response.json();
+    ctx.data = await response.json();
   }
 };
 
