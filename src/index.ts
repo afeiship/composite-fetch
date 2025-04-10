@@ -1,7 +1,7 @@
 type MiddlewareFunction = (ctx: Context, next: () => Promise<void>) => Promise<void>;
 
 interface Middleware {
-  priority: number; // 优先级字段
+  priority?: number; // 可选的优先级字段，默认为 0
   fn: MiddlewareFunction; // 中间件函数
 }
 
@@ -44,7 +44,7 @@ const compositeFetch = async (
 
   // 根据优先级对中间件进行排序
   const sortedMiddlewares = (registeredMiddlewares || [])
-    .sort((a, b) => a.priority - b.priority) // 按优先级升序排序
+    .sort((a, b) => (a.priority || 0) - (b.priority || 0)) // 处理可选的优先级字段
     .map((middleware) => middleware.fn); // 提取中间件函数
 
   // 添加默认的 fetch 中间件

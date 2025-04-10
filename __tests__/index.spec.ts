@@ -153,3 +153,86 @@ describe('Edge cases', () => {
     expect(response).toBeDefined();
   });
 });
+
+describe('Optional priority field', () => {
+  it('should handle middleware without priority field', async () => {
+    const order: number[] = [];
+
+    const middleware1 = {
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(1);
+        await next();
+      }
+    };
+
+    const middleware2 = {
+      priority: 1,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(2);
+        await next();
+      }
+    };
+
+    const middleware3 = {
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(3);
+        await next();
+      }
+    };
+
+    await compositeFetch('https://httpbin.org/get', {}, [middleware1, middleware2, middleware3]);
+    expect(order).toEqual([1, 3, 2]);
+  });
+
+  it('should handle all middlewares without priority field', async () => {
+    const order: number[] = [];
+
+    const middleware1 = {
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(1);
+        await next();
+      }
+    };
+
+    const middleware2 = {
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(2);
+        await next();
+      }
+    };
+
+    await compositeFetch('https://httpbin.org/get', {}, [middleware1, middleware2]);
+    expect(order).toEqual([1, 2]);
+  });
+
+  it('should preserve middleware context modifications', async () => {
+    const middleware1 = {
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'X-Test-1': 'value-1'
+        };
+        await next();
+      }
+    };
+
+    const middleware2 = {
+      priority: 1,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'X-Test-2': 'value-2'
+        };
+        await next();
+      }
+    };
+
+    const response = await compositeFetch('https://httpbin.org/headers', {}, [
+      middleware1,
+      middleware2
+    ]);
+    const data = await response.json();
+    expect(data.headers['X-Test-1']).toBe('value-1');
+    expect(data.headers['X-Test-2']).toBe('value-2');
+  });
+});
