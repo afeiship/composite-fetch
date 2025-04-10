@@ -10,7 +10,6 @@ interface Context {
 const compose = (middlewares: Middleware[]) => {
   return function (ctx: Context) {
     let index = -1;
-    const steps: Array<() => Promise<void>> = [];
 
     const dispatch = async (i: number): Promise<void> => {
       if (i <= index) {
@@ -19,30 +18,7 @@ const compose = (middlewares: Middleware[]) => {
       index = i;
       const fn = middlewares[i];
       if (!fn) return;
-
-      let isNextCalled = false;
-      const next = async () => {
-        isNextCalled = true;
-        return dispatch(i + 1);
-      };
-
-      await fn(ctx, () => {
-        const promise = next();
-        steps.push(async () => {
-          await promise;
-        });
-        return promise;
-      });
-
-      if (!isNextCalled) {
-        await next();
-      }
-
-      // 执行响应处理
-      const currentStep = steps.pop();
-      if (currentStep) {
-        await currentStep();
-      }
+      await fn(ctx, () => dispatch(i + 1));
     };
 
     return dispatch(0);
