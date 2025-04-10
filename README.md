@@ -16,18 +16,16 @@ yarn add @jswork/composite-fetch
 import compositeFetch from '@jswork/composite-fetch';
 
 // 定义中间件
-const logMiddleware = async (ctx, next) => {
-  console.log('Request:', ctx.url);
-  await next();
-  console.log('Response:', ctx.response.status);
+const middleware1 = async (ctx, next) => {
+  console.log('Middleware 1: Before');
+  await next(); // 调用空的 next()
+  console.log('Middleware 1: After');
 };
 
-const headerMiddleware = async (ctx, next) => {
-  ctx.options.headers = {
-    ...ctx.options.headers,
-    'X-Custom-Header': 'test-value'
-  };
-  await next();
+const middleware2 = async (ctx, next) => {
+  console.log('Middleware 2: Before');
+  await next(); // 调用空的 next()
+  console.log('Middleware 2: After');
 };
 
 // 使用示例
@@ -44,6 +42,12 @@ try {
 } catch (error) {
   console.error('Request failed:', error);
 }
+
+
+// Middleware 1: Before
+// Middleware 1: After
+// Middleware 2: Before
+// Middleware 2: After
 ```
 
 ## license

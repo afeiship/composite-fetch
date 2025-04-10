@@ -8,20 +8,10 @@ interface Context {
 }
 
 const compose = (middlewares: Middleware[]) => {
-  return function (ctx: Context) {
-    let index = -1;
-
-    const dispatch = async (i: number): Promise<void> => {
-      if (i <= index) {
-        throw new Error('next() called multiple times');
-      }
-      index = i;
-      const fn = middlewares[i];
-      if (!fn) return;
-      await fn(ctx, () => dispatch(i + 1));
-    };
-
-    return dispatch(0);
+  return async function (ctx: Context): Promise<void> {
+    for (const middleware of middlewares) {
+      await middleware(ctx, async () => {});
+    }
   };
 };
 
