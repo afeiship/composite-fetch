@@ -1,30 +1,45 @@
 {
-  "name": "next-version-compare",
-  "version": "0.0.0",
-  "description": "Version compare for next.",
-  "homepage": "https://github.com/afeiship/next-version-compare",
-  "author": {
-    "name": "afei",
-    "email": "1290657123@qq.com"
-  },
+  "name": "@jswork/composite-fetch",
+  "version": "1.0.0",
+  "description": "A minimal fetch wrapper with middleware support and customizable behavior.",
+  "type": "module",
+  "npmClient": "pnpm",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "global.d.ts"
+  ],
+  "prettier": "@jswork/style-guide/prettier",
   "scripts": {
-    "build": "gulp"
+    "build": "tsup",
+    "test": "bun test",
+    "release": "release-it"
   },
-  "main": "dist/next-version-compare.js",
   "license": "MIT",
   "devDependencies": {
-    "del": "^2.2.1",
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.0",
-    "gulp-load-plugins": "^1.2.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.3.2",
-    "gulp-size": "^2.1.0",
-    "gulp-uglify": "^2.1.2",
-    "yargs": "^4.7.1",
-    "mocha": "^3.5.0"
+    "@jswork/style-guide": "^1.0.3",
+    "@jswork/tsup-banner": "^1.0.4",
+    "@swc/core": "^1.5.5",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.11",
+    "esbuild-plugin-replace": "^1.4.0",
+    "esbuild-plugin-umd-wrapper": "^3.0.0",
+    "prettier": "^3.3.3",
+    "tsup": "^8.2.4",
+    "typescript": "^4.9.5"
   },
-  "dependencies": {
-    "next-js-core2": "github:afeiship/next-js-core2"
-  }
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "homepage": "https://js.work",
+  "keywords": [
+    "composite-fetch",
+    "number",
+    "num"
+  ]
 }
