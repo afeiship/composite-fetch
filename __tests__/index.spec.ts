@@ -17,16 +17,139 @@ describe('Normal test cases', () => {
   });
 
   it('should work with middleware', async () => {
-    const middleware = async (ctx: any, next: () => Promise<void>) => {
-      ctx.options.headers = {
-        ...ctx.options.headers,
-        'X-Custom-Header': 'test-value'
-      };
-      await next();
+    const middleware = {
+      priority: 1,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'X-Custom-Header': 'test-value'
+        };
+        await next();
+      }
     };
 
     const response = await compositeFetch('https://httpbin.org/headers', {}, [middleware]);
     const data = await response.json();
     expect(data.headers['X-Custom-Header']).toBe('test-value');
+  });
+});
+
+describe('Middleware priority and composition', () => {
+  it('should execute middlewares in priority order', async () => {
+    const order: number[] = [];
+
+    const middleware1 = {
+      priority: 2,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(2);
+        await next();
+      }
+    };
+
+    const middleware2 = {
+      priority: 1,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(1);
+        await next();
+      }
+    };
+
+    await compositeFetch('https://httpbin.org/get', {}, [middleware1, middleware2]);
+    expect(order).toEqual([1, 2]);
+  });
+
+  it('should handle multiple middlewares modifying the same context', async () => {
+    const headerMiddleware = {
+      priority: 1,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'X-Header-1': 'value-1'
+        };
+        await next();
+      }
+    };
+
+    const secondHeaderMiddleware = {
+      priority: 2,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'X-Header-2': 'value-2'
+        };
+        await next();
+      }
+    };
+
+    const response = await compositeFetch('https://httpbin.org/headers', {}, [
+      headerMiddleware,
+      secondHeaderMiddleware
+    ]);
+    const data = await response.json();
+    expect(data.headers['X-Header-1']).toBe('value-1');
+    expect(data.headers['X-Header-2']).toBe('value-2');
+  });
+});
+
+describe('Error handling', () => {
+  it('should handle network errors', async () => {
+    try {
+      await compositeFetch('https://invalid-url');
+      fail('Should have thrown an error');
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  it('should handle middleware errors', async () => {
+    const errorMiddleware = {
+      priority: 1,
+      fn: async () => {
+        throw new Error('Middleware error');
+      }
+    };
+
+    try {
+      await compositeFetch('https://httpbin.org/get', {}, [errorMiddleware]);
+      fail('Should have thrown an error');
+    } catch (error: any) {
+      expect(error.message).toBe('Middleware error');
+    }
+  });
+
+  it('should handle multiple next() calls', async () => {
+    const invalidMiddleware = {
+      priority: 1,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        await next();
+        await next(); // This should throw an error
+      }
+    };
+
+    try {
+      await compositeFetch('https://httpbin.org/get', {}, [invalidMiddleware]);
+      fail('Should have thrown an error');
+    } catch (error: any) {
+      expect(error.message).toBe('next() called multiple times');
+    }
+  });
+});
+
+describe('Edge cases', () => {
+  it('should work with empty middleware array', async () => {
+    const response = await compositeFetch('https://httpbin.org/get', {}, []);
+    expect(response.ok).toBe(true);
+  });
+
+  it('should handle middleware that does not call next()', async () => {
+    const noNextMiddleware = {
+      priority: 1,
+      fn: async () => {
+        // Intentionally not calling next()
+      }
+    };
+
+    const response = await compositeFetch('https://httpbin.org/get', {}, [noNextMiddleware]);
+    expect(response).toBeDefined();
   });
 });

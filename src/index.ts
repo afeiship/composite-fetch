@@ -1,4 +1,9 @@
-type Middleware = (ctx: Context, next: () => Promise<void>) => Promise<void>;
+type MiddlewareFunction = (ctx: Context, next: () => Promise<void>) => Promise<void>;
+
+interface Middleware {
+  priority: number; // 优先级字段
+  fn: MiddlewareFunction; // 中间件函数
+}
 
 interface Context {
   url: string;
@@ -7,7 +12,7 @@ interface Context {
   error: Error | null;
 }
 
-const compose = (middlewares: Middleware[]) => {
+const compose = (middlewares: MiddlewareFunction[]) => {
   return function (ctx: Context) {
     let index = -1;
 
@@ -28,7 +33,7 @@ const compose = (middlewares: Middleware[]) => {
 const compositeFetch = async (
   url: string,
   options: RequestInit = {},
-  interceptors: Middleware[] = []
+  registeredMiddlewares: Middleware[] = []
 ): Promise<Response> => {
   const ctx: Context = {
     url,
@@ -37,8 +42,14 @@ const compositeFetch = async (
     error: null,
   };
 
-  const composed = compose([
-    ...interceptors,
+  // 根据优先级对中间件进行排序
+  const sortedMiddlewares = registeredMiddlewares
+    .sort((a, b) => a.priority - b.priority) // 按优先级升序排序
+    .map((middleware) => middleware.fn); // 提取中间件函数
+
+  // 添加默认的 fetch 中间件
+  const finalMiddlewares = [
+    ...sortedMiddlewares,
     async (ctx) => {
       try {
         const res = await fetch(ctx.url, ctx.options);
@@ -47,7 +58,9 @@ const compositeFetch = async (
         ctx.error = err as Error;
       }
     },
-  ]);
+  ];
+
+  const composed = compose(finalMiddlewares);
 
   await composed(ctx);
 
