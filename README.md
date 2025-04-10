@@ -18,7 +18,9 @@ import compositeFetch from '@jswork/composite-fetch';
 const jsonMiddleware = async (ctx, next) => {
 
   // add coustom header
-  ctx.request.headers.set('X-Custom-Header', 'test-value');
+  ctx.options.headers = {
+    'X-Custom-Header': 'test-value'
+  };
 
   await next();
   const response = ctx.response;
