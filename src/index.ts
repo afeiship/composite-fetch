@@ -7,7 +7,7 @@ interface Middleware {
 
 interface Context {
   url: string;
-  options: RequestInit;
+  options: RequestInit | undefined;
   response: Response | null;
   error: Error | null;
 }
@@ -32,7 +32,7 @@ const compose = (middlewares: MiddlewareFunction[]) => {
 
 const compositeFetch = async (
   url: string,
-  options: RequestInit = {},
+  options?: RequestInit,
   registeredMiddlewares?: Middleware[]
 ): Promise<Response> => {
   const ctx: Context = {

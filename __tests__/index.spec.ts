@@ -236,3 +236,25 @@ describe('Optional priority field', () => {
     expect(data.headers['X-Test-2']).toBe('value-2');
   });
 });
+
+describe('Options parameter', () => {
+  it('should work without options parameter', async () => {
+    const response = await compositeFetch('https://httpbin.org/get');
+    expect(response.ok).toBe(true);
+  });
+
+  it('should work with custom options', async () => {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ test: 'data' })
+    };
+
+    const response = await compositeFetch('https://httpbin.org/post', options);
+    const data = await response.json();
+    expect(data.headers['Content-Type']).toBe('application/json');
+    expect(data.json.test).toBe('data');
+  });
+});
