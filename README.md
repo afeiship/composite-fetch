@@ -27,10 +27,32 @@ const headerMiddleware = {
   }
 };
 
-// 使用中间件发起请求
-const response = await compositeFetch('https://api.example.com', {}, [headerMiddleware]);
+// 创建一个日志中间件
+const logMiddleware = {
+  priority: 2,
+  fn: async (ctx, next) => {
+    console.log('Request:', ctx.url);
+    await next();
+    console.log('Response:', ctx.response?.status);
+  }
+};
+
+// 使用多个中间件发起请求
+const response = await compositeFetch('https://api.example.com', {}, [
+  headerMiddleware,
+  logMiddleware
+]);
 const data = await response.json();
+
+// 中间件是可选的
+const simpleResponse = await compositeFetch('https://api.example.com');
 ```
+
+## 特性
+- 支持中间件机制，可以自定义请求和响应的处理逻辑
+- 中间件优先级排序，通过 priority 字段控制执行顺序
+- 完整的错误处理，包括网络错误和中间件错误
+- TypeScript 支持，提供完整的类型定义
 
 ## license
 Code released under [the MIT license](https://github.com/afeiship/composite-fetch/blob/master/LICENSE.txt).

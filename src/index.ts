@@ -33,7 +33,7 @@ const compose = (middlewares: MiddlewareFunction[]) => {
 const compositeFetch = async (
   url: string,
   options: RequestInit = {},
-  registeredMiddlewares: Middleware[] = []
+  registeredMiddlewares?: Middleware[]
 ): Promise<Response> => {
   const ctx: Context = {
     url,
@@ -43,7 +43,7 @@ const compositeFetch = async (
   };
 
   // 根据优先级对中间件进行排序
-  const sortedMiddlewares = registeredMiddlewares
+  const sortedMiddlewares = (registeredMiddlewares || [])
     .sort((a, b) => a.priority - b.priority) // 按优先级升序排序
     .map((middleware) => middleware.fn); // 提取中间件函数
 
