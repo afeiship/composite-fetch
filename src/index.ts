@@ -34,10 +34,11 @@ const compositeFetch = async (
     url,
     options: options || {},
     response: null,
-    error: null,
+    error: null
   };
 
-  const composed = compose([
+  // pipe interceptors
+  const finalMiddlewares = [
     ...(interceptors || []),
     async (ctx) => {
       try {
@@ -46,8 +47,10 @@ const compositeFetch = async (
       } catch (err) {
         ctx.error = err as Error;
       }
-    },
-  ]);
+    }
+  ].reverse();
+
+  const composed = compose(finalMiddlewares);
 
   await composed(ctx);
 
