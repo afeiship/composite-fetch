@@ -6,19 +6,29 @@
 [![size][size-image]][size-url]
 [![download][download-image]][download-url]
 
-## installation
+## Installation
 ```shell
 yarn add @jswork/composite-fetch
 ```
 
-## usage
+## Features
+- Middleware support for customizing request and response handling
+- Priority-based middleware ordering with optional priority field (default: 0)
+- Support for both object-style and function-style middleware definitions
+- Comprehensive error handling for network and middleware errors
+- Flexible parameter configuration with optional options and middleware array
+- Full TypeScript support with complete type definitions
+
+## Usage
+
+### Basic Usage
 ```js
 import compositeFetch from '@jswork/composite-fetch';
 
-// 基本用法 - 不带任何参数
+// Basic usage - without any parameters
 const response1 = await compositeFetch('https://api.example.com');
 
-// 使用自定义选项
+// Using custom options
 const response2 = await compositeFetch('https://api.example.com', {
   method: 'POST',
   headers: {
@@ -26,10 +36,15 @@ const response2 = await compositeFetch('https://api.example.com', {
   },
   body: JSON.stringify({ data: 'example' })
 });
+```
 
-// 使用中间件
+### Using Middleware
+
+#### Object-Style Middleware
+```js
+// Object-style middleware with priority
 const headerMiddleware = {
-  priority: 1, // 优先级是可选的，默认为 0
+  priority: 1, // Priority is optional, defaults to 0
   fn: async (ctx, next) => {
     ctx.options.headers = {
       ...ctx.options.headers,
@@ -47,41 +62,46 @@ const logMiddleware = {
     console.log('Response:', ctx.response?.status);
   }
 };
+```
 
-// 使用多个中间件发起请求
+#### Function-Style Middleware
+```js
+// Direct function middleware (priority defaults to 0)
+const timingMiddleware = async (ctx, next) => {
+  const start = Date.now();
+  await next();
+  const duration = Date.now() - start;
+  console.log(`Request took ${duration}ms`);
+};
+
+// Using both styles together
 const response3 = await compositeFetch('https://api.example.com', {}, [
   headerMiddleware,
+  timingMiddleware, // Function-style middleware
   logMiddleware
 ]);
 ```
 
-## features
-- 支持中间件机制，可以自定义请求和响应的处理逻辑
-- 中间件优先级排序，通过可选的 priority 字段控制执行顺序（默认为 0）
-- 完整的错误处理，包括网络错误和中间件错误
-- 灵活的参数配置，支持可选的 options 和中间件数组
-- TypeScript 支持，提供完整的类型定义
+## Middleware Context
+Middleware functions receive two parameters:
+- `ctx`: Context object with the following properties:
+  - `url`: Request URL
+  - `options`: Request configuration options (optional)
+  - `response`: Response object (available after request completion)
+  - `error`: Error object (if an error occurs)
+- `next`: Function to call the next middleware
 
-## middleware context
-中间件函数接收两个参数：
-- `ctx`: 上下文对象，包含以下属性：
-  - `url`: 请求 URL
-  - `options`: 请求配置选项（可选）
-  - `response`: 响应对象（在请求完成后可用）
-  - `error`: 错误对象（如果发生错误）
-- `next`: 调用下一个中间件的函数
-
-## error handling
+## Error Handling
 ```js
 try {
   const response = await compositeFetch('https://api.example.com');
 } catch (error) {
-  // 处理网络错误或中间件错误
+  // Handle network or middleware errors
   console.error('Request failed:', error);
 }
 ```
 
-## license
+## License
 Code released under [the MIT license](https://github.com/afeiship/composite-fetch/blob/master/LICENSE.txt).
 
 [version-image]: https://img.shields.io/npm/v/@jswork/composite-fetch

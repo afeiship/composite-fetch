@@ -154,6 +154,48 @@ describe('Edge cases', () => {
   });
 });
 
+describe('Direct middleware function support', () => {
+  it('should support direct middleware functions', async () => {
+    const order: number[] = [];
+
+    const directMiddleware = async (ctx: any, next: () => Promise<void>) => {
+      order.push(1);
+      await next();
+    };
+
+    const objectMiddleware = {
+      priority: 2,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(2);
+        await next();
+      }
+    };
+
+    await compositeFetch('https://httpbin.org/get', {}, [directMiddleware, objectMiddleware]);
+    expect(order).toEqual([1, 2]);
+  });
+
+  it('should treat direct middleware functions with default priority 0', async () => {
+    const order: number[] = [];
+
+    const directMiddleware = async (ctx: any, next: () => Promise<void>) => {
+      order.push(1);
+      await next();
+    };
+
+    const objectMiddleware = {
+      priority: -1,
+      fn: async (ctx: any, next: () => Promise<void>) => {
+        order.push(2);
+        await next();
+      }
+    };
+
+    await compositeFetch('https://httpbin.org/get', {}, [directMiddleware, objectMiddleware]);
+    expect(order).toEqual([2, 1]);
+  });
+});
+
 describe('Optional priority field', () => {
   it('should handle middleware without priority field', async () => {
     const order: number[] = [];
