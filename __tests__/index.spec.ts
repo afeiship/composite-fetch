@@ -16,18 +16,31 @@ describe('Normal test cases', () => {
     }
   });
 
-  it('should work with middleware', async () => {
-    const middleware = async (ctx: any, next: () => Promise<void>) => {
-      ctx.options.headers = {
-        ...ctx.options.headers,
-        'X-Custom-Header': 'test-value'
-      };
-      await next();
+  it('should work with request middleware', async () => {
+    const middleware = {
+      request: async (ctx: any) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'X-Custom-Header': 'test-value'
+        };
+      }
     };
 
     const response = await compositeFetch('https://httpbin.org/headers', {}, [middleware]);
     const data = await response.json();
     expect(data.headers['X-Custom-Header']).toBe('test-value');
+  });
+
+  it('should work with response middleware', async () => {
+    let responseData: any;
+    const middleware = {
+      response: async (ctx: any) => {
+        responseData = await ctx.response.json();
+      }
+    };
+
+    await compositeFetch('https://httpbin.org/headers', {}, [middleware]);
+    expect(responseData.headers).toBeDefined();
   });
 
   it('should work with only options parameter', async () => {
@@ -38,13 +51,21 @@ describe('Normal test cases', () => {
     expect(data.headers['X-Test-Header']).toBe('test-value');
   });
 
-  it('should work with only interceptors parameter', async () => {
-    const middleware = async (ctx: any, next: () => Promise<void>) => {
-      ctx.options.headers = { 'X-Interceptor-Header': 'test-value' };
-      await next();
+  it('should work with both request and response hooks', async () => {
+    let requestTime: number = 0;
+    let responseTime: number = 0;
+    const middleware = {
+      request: async (ctx: any) => {
+        requestTime = Date.now();
+        ctx.options.headers = { 'X-Interceptor-Header': 'test-value' };
+      },
+      response: async (ctx: any) => {
+        responseTime = Date.now();
+      }
     };
     const response = await compositeFetch('https://httpbin.org/headers', undefined, [middleware]);
     const data = await response.json();
     expect(data.headers['X-Interceptor-Header']).toBe('test-value');
+    expect(responseTime).toBeGreaterThan(requestTime);
   });
 });

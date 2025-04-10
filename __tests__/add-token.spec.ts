@@ -7,12 +7,13 @@ describe('Add token middleware real-world scenarios', () => {
       let currentToken = baseToken;
 
       // 预设认证令牌中间件
-      const authMiddleware = async (ctx: any, next: () => Promise<void>) => {
-        ctx.options.headers = {
-          ...ctx.options.headers,
-          'Authorization': `Bearer ${currentToken}`
-        };
-        await next();
+      const authMiddleware = {
+        request: async (ctx: any) => {
+          ctx.options.headers = {
+            ...ctx.options.headers,
+            'Authorization': `Bearer ${currentToken}`
+          };
+        }
       };
 
       // 返回封装后的 fetch 函数
@@ -48,12 +49,13 @@ describe('Add token middleware real-world scenarios', () => {
     let authToken = 'initial-token';
 
     // 创建添加令牌的中间件
-    const addTokenMiddleware = async (ctx: any, next: () => Promise<void>) => {
-      ctx.options.headers = {
-        ...ctx.options.headers,
-        'Authorization': `Bearer ${authToken}`
-      };
-      await next();
+    const addTokenMiddleware = {
+      request: async (ctx: any) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'Authorization': `Bearer ${authToken}`
+        };
+      }
     };
 
     // 第一次请求：使用初始令牌
@@ -74,21 +76,23 @@ describe('Add token middleware real-world scenarios', () => {
     const authToken = 'test-token';
 
     // 添加令牌的中间件
-    const addTokenMiddleware = async (ctx: any, next: () => Promise<void>) => {
-      ctx.options.headers = {
-        ...ctx.options.headers,
-        'Authorization': `Bearer ${authToken}`
-      };
-      await next();
+    const addTokenMiddleware = {
+      request: async (ctx: any) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'Authorization': `Bearer ${authToken}`
+        };
+      }
     };
 
     // 添加自定义头部的中间件
-    const addCustomHeaderMiddleware = async (ctx: any, next: () => Promise<void>) => {
-      ctx.options.headers = {
-        ...ctx.options.headers,
-        'X-Custom-Header': 'custom-value'
-      };
-      await next();
+    const addCustomHeaderMiddleware = {
+      request: async (ctx: any) => {
+        ctx.options.headers = {
+          ...ctx.options.headers,
+          'X-Custom-Header': 'custom-value'
+        };
+      }
     };
 
     // 组合多个中间件测试
