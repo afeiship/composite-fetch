@@ -15,9 +15,21 @@ yarn add @jswork/composite-fetch
 ```js
 import compositeFetch from '@jswork/composite-fetch';
 
-compositeFetch(1024);
+// 创建一个添加自定义请求头的中间件
+const headerMiddleware = {
+  priority: 1,
+  fn: async (ctx, next) => {
+    ctx.options.headers = {
+      ...ctx.options.headers,
+      'X-Custom-Header': 'custom-value'
+    };
+    await next();
+  }
+};
 
-// [1000, 0, 20, 4]
+// 使用中间件发起请求
+const response = await compositeFetch('https://api.example.com', {}, [headerMiddleware]);
+const data = await response.json();
 ```
 
 ## license
