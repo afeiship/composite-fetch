@@ -29,4 +29,22 @@ describe('Normal test cases', () => {
     const data = await response.json();
     expect(data.headers['X-Custom-Header']).toBe('test-value');
   });
+
+  it('should work with only options parameter', async () => {
+    const response = await compositeFetch('https://httpbin.org/headers', {
+      headers: { 'X-Test-Header': 'test-value' }
+    });
+    const data = await response.json();
+    expect(data.headers['X-Test-Header']).toBe('test-value');
+  });
+
+  it('should work with only interceptors parameter', async () => {
+    const middleware = async (ctx: any, next: () => Promise<void>) => {
+      ctx.options.headers = { 'X-Interceptor-Header': 'test-value' };
+      await next();
+    };
+    const response = await compositeFetch('https://httpbin.org/headers', undefined, [middleware]);
+    const data = await response.json();
+    expect(data.headers['X-Interceptor-Header']).toBe('test-value');
+  });
 });

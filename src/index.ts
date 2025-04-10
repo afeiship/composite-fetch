@@ -2,7 +2,7 @@ type Middleware = (ctx: Context, next: () => Promise<void>) => Promise<void>;
 
 interface Context {
   url: string;
-  options: RequestInit;
+  options?: RequestInit;
   response: Response | null;
   error: Error | null;
 }
@@ -27,18 +27,18 @@ const compose = (middlewares: Middleware[]) => {
 
 const compositeFetch = async (
   url: string,
-  options: RequestInit = {},
-  interceptors: Middleware[] = []
+  options?: RequestInit,
+  interceptors?: Middleware[]
 ): Promise<Response> => {
   const ctx: Context = {
     url,
-    options,
+    options: options || {},
     response: null,
     error: null,
   };
 
   const composed = compose([
-    ...interceptors,
+    ...(interceptors || []),
     async (ctx) => {
       try {
         const res = await fetch(ctx.url, ctx.options);
@@ -54,6 +54,5 @@ const compositeFetch = async (
   if (ctx.error) throw ctx.error;
   return ctx.response!;
 };
-
 
 export default compositeFetch;

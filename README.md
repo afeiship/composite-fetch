@@ -15,9 +15,35 @@ yarn add @jswork/composite-fetch
 ```js
 import compositeFetch from '@jswork/composite-fetch';
 
-compositeFetch(1024);
+// 定义中间件
+const logMiddleware = async (ctx, next) => {
+  console.log('Request:', ctx.url);
+  await next();
+  console.log('Response:', ctx.response.status);
+};
 
-// [1000, 0, 20, 4]
+const headerMiddleware = async (ctx, next) => {
+  ctx.options.headers = {
+    ...ctx.options.headers,
+    'X-Custom-Header': 'test-value'
+  };
+  await next();
+};
+
+// 使用示例
+try {
+  const response = await compositeFetch(
+    'https://httpbin.org/headers',
+    { headers: { 'Content-Type': 'application/json' } },
+    [logMiddleware, headerMiddleware]
+  );
+  
+  const data = await response.json();
+  console.log('Response headers:', data.headers);
+  // 输出将包含自定义头部 'X-Custom-Header: test-value'
+} catch (error) {
+  console.error('Request failed:', error);
+}
 ```
 
 ## license
