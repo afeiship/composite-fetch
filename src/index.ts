@@ -42,12 +42,12 @@ const compositeFetch = async (
     error: null,
   };
 
-  // 根据优先级对中间件进行排序
+  // Sort middlewares by priority
   const sortedMiddlewares = (registeredMiddlewares || [])
-    .sort((a, b) => (a.priority || 0) - (b.priority || 0)) // 处理可选的优先级字段
-    .map((middleware) => middleware.fn); // 提取中间件函数
+    .sort((a, b) => (a.priority || 0) - (b.priority || 0)) // Handle optional priority field
+    .map((middleware) => middleware.fn); // Extract middleware functions
 
-  // 添加默认的 fetch 中间件
+  // Add default fetch middleware
   const finalMiddlewares = [
     ...sortedMiddlewares,
     async (ctx) => {
