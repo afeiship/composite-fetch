@@ -1,14 +1,59 @@
-// 1-9
-// quotient 商
-// remainder 余数
+type Middleware = (ctx: Context, next: () => Promise<void>) => Promise<void>;
 
-const compositeFetch = (inNumber: number | string): number[] => {
-  const str = String(inNumber);
-  const rdx = str.length - 1;
-  return str.split('').map((n: string, idx) => {
-    if (n === '0') return 0;
-    return parseInt(n, 10) * Math.pow(10, rdx - idx);
-  });
+interface Context {
+  url: string;
+  options: RequestInit;
+  response: Response | null;
+  error: Error | null;
+}
+
+const compose = (middlewares: Middleware[]) => {
+  return function (ctx: Context) {
+    let index = -1;
+
+    const dispatch = async (i: number): Promise<void> => {
+      if (i <= index) {
+        throw new Error('next() called multiple times');
+      }
+      index = i;
+      const fn = middlewares[i];
+      if (!fn) return;
+      await fn(ctx, () => dispatch(i + 1));
+    };
+
+    return dispatch(0);
+  };
 };
+
+const compositeFetch = async (
+  url: string,
+  options: RequestInit = {},
+  interceptors: Middleware[] = []
+): Promise<Response> => {
+  const ctx: Context = {
+    url,
+    options,
+    response: null,
+    error: null,
+  };
+
+  const composed = compose([
+    ...interceptors,
+    async (ctx) => {
+      try {
+        const res = await fetch(ctx.url, ctx.options);
+        ctx.response = res;
+      } catch (err) {
+        ctx.error = err as Error;
+      }
+    },
+  ]);
+
+  await composed(ctx);
+
+  if (ctx.error) throw ctx.error;
+  return ctx.response!;
+};
+
 
 export default compositeFetch;

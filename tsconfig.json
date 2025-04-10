@@ -10,7 +10,8 @@
     "skipDefaultLibCheck": true,
     "module": "Node16",
     "moduleResolution": "Node16",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "lib": ["DOM", "DOM.Iterable", "ES2015", "ES2015.Promise"]
   },
   "include": [
     "src",
