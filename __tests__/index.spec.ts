@@ -1,5 +1,48 @@
 import compositeFetch from '../src';
 
+describe('Middleware execution order', () => {
+  it('should execute middleware in onion model order', async () => {
+    const order: string[] = [];
+    
+    const middleware1 = async (ctx: any, next: () => Promise<void>) => {
+      order.push('before1');
+      await next();
+      order.push('after1');
+    };
+
+    const middleware2 = async (ctx: any, next: () => Promise<void>) => {
+      order.push('before2');
+      await next();
+      order.push('after2');
+    };
+
+    await compositeFetch('https://httpbin.org/get', {}, [middleware1, middleware2]);
+    expect(order).toEqual(['before1', 'before2', 'after2', 'after1']);
+  });
+
+  it('should handle errors in middleware chain', async () => {
+    const order: string[] = [];
+    const errorMiddleware = async (ctx: any, next: () => Promise<void>) => {
+      order.push('before-error');
+      throw new Error('Test error');
+    };
+
+    const middleware = async (ctx: any, next: () => Promise<void>) => {
+      order.push('before');
+      await next();
+      order.push('after');
+    };
+
+    try {
+      await compositeFetch('https://httpbin.org/get', {}, [middleware, errorMiddleware]);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toBe('Test error');
+    }
+    expect(order).toEqual(['before', 'before-error']);
+  });
+});
+
 describe('Normal test cases', () => {
   it('should make a successful GET request', async () => {
     const response = await compositeFetch('https://httpbin.org/get');
