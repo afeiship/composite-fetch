@@ -3,6 +3,7 @@ type Middleware = (ctx: Context, next: () => Promise<void>) => Promise<void>;
 interface Context {
   url: string;
   options?: RequestInit;
+  data?: any;
   response: Response | null;
   error: Error | null;
 }
@@ -33,6 +34,7 @@ const compositeFetch = async (
   const ctx: Context = {
     url,
     options: options || {},
+    data: null,
     response: null,
     error: null
   };
