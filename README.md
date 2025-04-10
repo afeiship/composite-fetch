@@ -48,7 +48,7 @@ const data = await response.json();
 const simpleResponse = await compositeFetch('https://api.example.com');
 ```
 
-## 特性
+## features
 - 支持中间件机制，可以自定义请求和响应的处理逻辑
 - 中间件优先级排序，通过 priority 字段控制执行顺序
 - 完整的错误处理，包括网络错误和中间件错误
