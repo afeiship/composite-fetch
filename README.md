@@ -18,14 +18,12 @@ import compositeFetch from '@jswork/composite-fetch';
 const jsonMiddleware = async (ctx, next) => {
   await next();
   const response = ctx.response;
-  const contentType = response.headers.get(
-    'Content-Type'
-  );
+  const contentType = response.headers.get('Content-Type');
   if (
     contentType &&
     contentType.indexOf('application/json') !== -1
   ) {
-    ctx.data = await response.json();
+    ctx.response = await response.json();
   }
 };
 
