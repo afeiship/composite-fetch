@@ -1,6 +1,6 @@
 {
   "name": "@jswork/composite-fetch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A minimal fetch wrapper with middleware support and customizable behavior.",
   "type": "module",
   "npmClient": "pnpm",
@@ -38,8 +38,11 @@
   },
   "homepage": "https://js.work",
   "keywords": [
-    "composite-fetch",
-    "number",
-    "num"
+    "axios",
+    "compose",
+    "composite",
+    "fetch",
+    "http",
+    "request"
   ]
 }
