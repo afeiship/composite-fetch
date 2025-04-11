@@ -11,6 +11,29 @@
 yarn add @jswork/composite-fetch
 ```
 
+## mmd
+```mermaid
+graph LR
+    subgraph 请求阶段
+        M1R[中间件1.request] --> M2R[中间件2.request] --> M3R[中间件3.request]
+    end
+
+    subgraph Fetch请求
+        F[执行实际fetch请求]
+    end
+
+    subgraph 响应阶段
+        M1P[中间件1.response] --> M2P[中间件2.response] --> M3P[中间件3.response]
+    end
+
+    请求阶段 --> Fetch请求
+    Fetch请求 --> 响应阶段
+
+    style 请求阶段 fill:#f9f,stroke:#333,stroke-width:2px
+    style Fetch请求 fill:#bbf,stroke:#333,stroke-width:2px
+    style 响应阶段 fill:#bfb,stroke:#333,stroke-width:2px
+```
+
 ## usage
 ```js
 import compositeFetch from '@jswork/composite-fetch';
