@@ -1,6 +1,6 @@
 type Middleware = {
-  request?: (ctx: Context) => Promise<void>;
-  response?: (ctx: Context) => Promise<void>;
+  request?: (ctx: Context) => void | Promise<void>;
+  response?: (ctx: Context) => void | Promise<void>;
 };
 
 interface Context {
@@ -14,7 +14,7 @@ interface Context {
 const compose = (middlewares: Middleware[]) => {
   return function (ctx: Context) {
     let index = -1;
-    const responseHandlers: (() => Promise<void>)[] = [];
+    const responseHandlers: (() => void | Promise<void>)[] = [];
 
     const dispatch = async (i: number): Promise<void> => {
       if (i <= index) {
@@ -24,31 +24,31 @@ const compose = (middlewares: Middleware[]) => {
       const middleware = middlewares[i];
 
       if (!middleware) {
-        // 执行实际的 fetch 请求
+        // Execute the actual fetch request
         try {
           const res = await fetch(ctx.url, ctx.options);
           ctx.response = res;
         } catch (err) {
           ctx.error = err as Error;
         }
-        // 按顺序执行所有响应钩子
-        for (const handler of responseHandlers.reverse()) {
+        // Execute all response handlers in order
+        for (const handler of responseHandlers) {
           await handler();
         }
         return;
       }
 
-      // 执行请求前的钩子
+      // Execute request hook before fetch
       if (middleware.request) {
         await middleware.request(ctx);
       }
 
-      // 收集响应钩子
+      // Collect response handlers
       if (middleware.response) {
         responseHandlers.push(() => middleware.response!(ctx));
       }
 
-      // 执行下一个中间件
+      // Execute next middleware
       await dispatch(i + 1);
     };
 

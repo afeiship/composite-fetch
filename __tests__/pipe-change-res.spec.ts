@@ -57,9 +57,7 @@ describe('Response pipe change test cases', () => {
     };
 
     await compositeFetch('https://httpbin.org/get', {}, [middleware1, middleware2]);
-    console.log('processed: ', processed);
-
-    expect(processed).toEqual(['request1', 'request2', 'response2', 'response1']);
+    expect(processed).toEqual(['request1', 'request2', 'response1', 'response2']);
   });
 
   it('should handle error in response middleware', async () => {
