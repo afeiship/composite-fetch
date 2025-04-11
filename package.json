@@ -3,7 +3,6 @@
   "version": "1.0.16",
   "description": "A minimal fetch wrapper with middleware support and customizable behavior.",
   "type": "module",
-  "npmClient": "pnpm",
   "main": "dist/index.esm.js",
   "browser": "dist/index.umd.js",
   "typings": "dist/index.d.ts",
