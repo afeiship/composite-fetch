@@ -1,4 +1,4 @@
-import compositeFetch from '../src/index.js';
+import compositeFetch from '../src';
 
 describe('Normal test cases', () => {
   it('should make a successful GET request', async () => {

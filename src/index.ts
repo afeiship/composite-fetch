@@ -26,8 +26,7 @@ const compose = (middlewares: Middleware[]) => {
       if (!middleware) {
         // Execute the actual fetch request
         try {
-          const res = await fetch(ctx.url, ctx.options);
-          ctx.response = res;
+          ctx.response = await fetch(ctx.url, ctx.options);
         } catch (err) {
           ctx.error = err as Error;
         }

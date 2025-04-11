@@ -1,4 +1,4 @@
-import compositeFetch from '../src/index.js';
+import compositeFetch from '../src';
 
 describe('Sync middleware test cases', () => {
   it('should handle synchronous request middleware', async () => {
@@ -45,11 +45,11 @@ describe('Sync middleware test cases', () => {
 
     const asyncMiddleware = {
       request: async (ctx: any) => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         processed.push('async request');
       },
       response: async (ctx: any) => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         processed.push('async response');
       }
     };
