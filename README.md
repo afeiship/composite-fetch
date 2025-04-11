@@ -15,84 +15,102 @@ yarn add @jswork/composite-fetch
 ```js
 import compositeFetch from '@jswork/composite-fetch';
 
-// 请求拦截中间件：添加认证信息
-const authMiddleware = {
-  request: async (ctx) => {
-    // 在请求前添加认证头
-    ctx.options.headers = {
-      ...ctx.options.headers,
-      'Authorization': 'Bearer your-token-here'
-    };
-  }
-};
-
-// 响应处理中间件：自动解析 JSON 响应
-const jsonMiddleware = {
-  response: async (ctx) => {
-    const response = ctx.response;
-    const contentType = response.headers.get('Content-Type');
-    
-    if (contentType?.includes('application/json')) {
-      const data = await response.json();
-      // 将解析后的数据存储在 ctx.extra 中
-      ctx.extra = { data };
-    }
-  }
-};
-
-// 错误处理中间件：统一处理错误
+// 第一个中间件：错误处理
 const errorMiddleware = {
   request: async (ctx) => {
-    // 可以在请求前进行一些配置
+    console.log('1. errorMiddleware.request');
+    // 第一个执行的 request 钩子
     ctx.options.headers = {
       ...ctx.options.headers,
       'Accept': 'application/json'
     };
   },
   response: async (ctx) => {
-    // 处理非 2xx 的响应
+    console.log('5. errorMiddleware.response');
+    // 第一个执行的 response 钩子
     if (!ctx.response.ok) {
       throw new Error(`HTTP Error: ${ctx.response.status}`);
     }
   }
 };
 
+// 第二个中间件：认证信息
+const authMiddleware = {
+  request: async (ctx) => {
+    console.log('2. authMiddleware.request');
+    // 第二个执行的 request 钩子
+    ctx.options.headers = {
+      ...ctx.options.headers,
+      'Authorization': 'Bearer your-token-here'
+    };
+  },
+  response: async (ctx) => {
+    console.log('6. authMiddleware.response');
+  }
+};
+
+// 第三个中间件：JSON 响应处理
+const jsonMiddleware = {
+  request: async (ctx) => {
+    console.log('3. jsonMiddleware.request');
+  },
+  response: async (ctx) => {
+    console.log('7. jsonMiddleware.response');
+    // 第二个执行的 response 钩子
+    const response = ctx.response;
+    const contentType = response.headers.get('Content-Type');
+
+    if (contentType?.includes('application/json')) {
+      const data = await response.json();
+      ctx.extra = { data };
+    }
+  }
+};
+
 // 使用示例
 try {
-  // 组合多个中间件，按照顺序执行
+  console.log('开始执行中间件链：');
+  // 中间件按照数组顺序依次执行
+  // 1. errorMiddleware.request
+  // 2. authMiddleware.request
+  // 3. jsonMiddleware.request (如果有)
+  // 4. 发起实际的 fetch 请求
+  // 5. errorMiddleware.response
+  // 6. authMiddleware.response (如果有)
+  // 7. jsonMiddleware.response
   const response = await compositeFetch(
-    'https://api.example.com/data',
+    'https://httpbin.org/get',
     {
       method: 'GET'
     },
     [errorMiddleware, authMiddleware, jsonMiddleware]
   );
-
-  // 获取解析后的数据
   console.log('Response data:', response);
-  if (ctx.extra?.data) {
-    console.log('Parsed JSON data:', ctx.extra.data);
-  }
 } catch (error) {
   console.error('Request failed:', error);
 }
 ```
 
-## 中间件执行顺序
-中间件执行顺序遵循洋葱模型：
+## middleware execution order
+The middleware execution follows a sequential order:
+1. Request hooks are executed in array order
+2. Actual fetch request is made
+3. Response hooks are executed in array order
+
+For example, with [errorMiddleware, authMiddleware, jsonMiddleware]:
 1. errorMiddleware.request
 2. authMiddleware.request
 3. jsonMiddleware.request
-4. 实际的 fetch 请求
-5. jsonMiddleware.response
+4. Actual fetch request
+5. errorMiddleware.response
 6. authMiddleware.response
-7. errorMiddleware.response
+7. jsonMiddleware.response
 
-## 中间件类型定义
+## middleware signature
 ```typescript
 type Middleware = {
-  request?: (ctx: Context) => Promise<void>;
-  response?: (ctx: Context) => Promise<void>;
+  request?: (ctx: Context) => void | Promise<void>;
+  response?: (ctx: Context) => void | Promise<void>;
 };
 
 interface Context {
